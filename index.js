@@ -1,4 +1,5 @@
 import flipkart_scraper from "@dvishal485/flipkart_scraper";
+
 import express from "express";
 const port = process.env.PORT || 3001;
 
@@ -9,6 +10,21 @@ app.use(express.json());
 const logQueue = [];
 let isLogging = false;
 let responseLogs = [];
+
+// Browser headers to avoid detection
+const browserHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Cache-Control': 'max-age=0'
+};
 
 function logEndpoint(level, ...args) {
     logQueue.push({ level, args });
@@ -32,7 +48,13 @@ async function* streamProducts(products, limit = 5) {
         const product = products[i];
         logEndpoint("info", `\nFetching details for product ${i + 1}: ${product.product_name}`);
         try {
-            const product_webpage = await fetch(product.product_link).then(r => r.text());
+            // Add delay and headers for individual product requests
+            await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500)); // 0.5-1.5s delay
+            
+            const product_webpage = await fetch(product.product_link, {
+                headers: browserHeaders
+            }).then(r => r.text());
+            
             const details = flipkart_scraper.parse_product_details(product_webpage);
             const combinedData = {
                 product_name: product.product_name,
@@ -79,7 +101,8 @@ async function* streamProducts(products, limit = 5) {
             logEndpoint("info", `Link: ${fallbackData.product_link}`);
             yield fallbackData;
         }
-        await new Promise(resolve => setTimeout(resolve, 10));
+        // Increased delay between products
+        await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 200)); // 0.2-0.7s delay
     }
 }
 
@@ -100,7 +123,21 @@ app.post("/scrape", async (req, res) => {
     }
     try {
         logEndpoint("info", `Scraping URL: ${url}`);
-        const webpage = await fetch(url).then(async (response) => await response.text());
+        
+        // Add headers and debug response
+        const response = await fetch(url, {
+            headers: browserHeaders
+        });
+        
+        logEndpoint("info", `Response status: ${response.status}`);
+        logEndpoint("info", `Response content-type: ${response.headers.get('content-type')}`);
+        
+        const webpage = await response.text();
+        logEndpoint("info", `Response length: ${webpage.length} characters`);
+        
+        // Debug: log first 200 characters to see what we're getting
+        logEndpoint("info", `Response preview: ${webpage.substring(0, 200).replace(/\s+/g, ' ')}`);
+        
         const data = flipkart_scraper.parse_search_results(webpage);
 
         logEndpoint("info", `Found ${data.length} products. Streaming detailed information...`);
@@ -122,7 +159,18 @@ app.post("/scrape", async (req, res) => {
     }
 });
 
-// Start server
+// Add a root endpoint for testing
+app.get("/", (req, res) => {
+    res.json({ 
+        message: "Flipkart Scraper API", 
+        endpoints: {
+            "POST /scrape": "Scrape Flipkart search results"
+        },
+        status: "Running"
+    });
+});
+
+// Start server - Fixed the port message
 app.listen(port, () => {
-    console.log("Scraper API listening on port 3000");
+    console.log(`Scraper API listening on port ${port}`);
 });
