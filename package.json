@@ -1,5 +1,5 @@
 {
-  "name": "js_demo",
+  "name": "flipkar-scrap",
   "version": "1.0.0",
   "description": "JS Demo to use the wasm build of flipkart-scraper",
   "main": "index.js",
@@ -13,7 +13,7 @@
     "url": "git+https://github.com/dvishal485/flipkart-scraper.git#main"
   },
   "keywords": [
-    "js_demo",
+    "flipkar-scrap",
     "flipkart",
     "flipkart-scraper"
   ],
@@ -27,6 +27,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@dvishal485/flipkart_scraper": "latest"
+    "@dvishal485/flipkart_scraper": "latest",
+    "express": "^5.1.0"
   }
 }
