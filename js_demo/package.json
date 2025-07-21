@@ -1,0 +1,32 @@
+{
+  "name": "js_demo",
+  "version": "1.0.0",
+  "description": "JS Demo to use the wasm build of flipkart-scraper",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc index.ts -m nodenext",
+    "start": "node index.js || (echo 'Please run `npm run build` to build the project first' && exit 1)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dvishal485/flipkart-scraper.git#main"
+  },
+  "keywords": [
+    "js_demo",
+    "flipkart",
+    "flipkart-scraper"
+  ],
+  "author": "dvishal485",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dvishal485/flipkart-scraper/issues"
+  },
+  "homepage": "https://github.com/dvishal485/flipkart-scraper/tree/main#readme",
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@dvishal485/flipkart_scraper": "latest"
+  }
+}
